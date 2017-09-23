@@ -46,6 +46,29 @@ void _PG_init(void);
  */
 static ExecutorCheckPerms_hook_type next_ExecutorCheckPerms_hook = NULL;
 
+static bool checkRole(void)
+{
+    Oid allow_roleOid;
+
+    if (superuser())
+        return true;
+
+    if (allow_role == NULL)
+        return false;
+
+    allow_roleOid = get_role_oid(allow_role, true);
+    ereport(DEBUG1, (errmsg("allow_role = %s, allow_roleOid = %d, GetUserId() = %d.", 
+        allow_role, allow_roleOid, GetUserId())));
+
+    /*
+     * Is the current user included in members of allow_role?
+     */
+    if (is_member_of_role(allow_roleOid, GetUserId()))
+        return true;
+
+    return false;
+}
+
 static void checkTables(List * rangeTabls)
 {
     ListCell *lr;
@@ -54,8 +77,18 @@ static void checkTables(List * rangeTabls)
         RangeTblEntry *rte = lfirst(lr);
         Relation rel;
         Oid relOid;
+        bool allow = true;
 
-        if (!superuser()) {
+        /*
+         * 1: superuser or allow_role (Roles can refer to the system catalog.)
+         * 0: other role/user (Roles can not refer to the system catalog.)
+         */
+        allow = checkRole();
+
+        if (!allow) {
+            /*
+             * To check whether the query to perform the access to the system catalog.
+             */
             relOid = rte->relid;
             rel = relation_open(relOid, NoLock);
 
