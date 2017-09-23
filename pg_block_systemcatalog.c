@@ -63,7 +63,7 @@ static bool checkRole(void)
     /*
      * Is the current user included in members of allow_role?
      */
-    if (is_member_of_role(allow_roleOid, GetUserId()))
+    if (is_member_of_role(GetUserId(), allow_roleOid))
         return true;
 
     return false;
@@ -72,26 +72,32 @@ static bool checkRole(void)
 static void checkTables(List * rangeTabls)
 {
     ListCell *lr;
+    bool allow = true;
+
+    /*
+     * 1: superuser or allow_role (Roles can refer to the system catalog.)
+     * 0: other role/user (Roles can not refer to the system catalog.)
+     */
+    allow = checkRole();
+    ereport(DEBUG1, (errmsg("allow = %d", allow)));
+
     foreach(lr, rangeTabls)
     {
         RangeTblEntry *rte = lfirst(lr);
         Relation rel;
         Oid relOid;
-        bool allow = true;
 
-        /*
-         * 1: superuser or allow_role (Roles can refer to the system catalog.)
-         * 0: other role/user (Roles can not refer to the system catalog.)
-         */
-        allow = checkRole();
-
-        ereport(DEBUG1, (errmsg("allow = %d", allow)));
 
         if (!allow) {
             /*
              * To check whether the query to perform the access to the system catalog.
              */
             relOid = rte->relid;
+
+            if (relOid == InvalidOid)
+                ereport(ERROR, (errcode(ERRCODE_INVALID_SCHEMA_DEFINITION),
+                    errmsg("pg_block_systemcatalog: Reference to the system catalog is not permitted.")));
+
             rel = relation_open(relOid, NoLock);
 
             if (IsSystemNamespace(RelationGetNamespace(rel)))
