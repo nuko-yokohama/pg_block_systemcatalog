@@ -85,6 +85,8 @@ static void checkTables(List * rangeTabls)
          */
         allow = checkRole();
 
+        ereport(DEBUG1, (errmsg("allow = %d", allow)));
+
         if (!allow) {
             /*
              * To check whether the query to perform the access to the system catalog.
