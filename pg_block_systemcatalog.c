@@ -152,7 +152,8 @@ _PG_init(void)
     ExecutorCheckPerms_hook = pg_bsc_ExecutorCheckPerms_hook;
 
     /* Log that the extension has completed initialization */
-    ereport(LOG, (errmsg("pg_block_systemcatalog.")));
+    ereport(LOG, (errmsg("pg_block_systemcatalog initialized. allow_role = %s",
+        (allow_role == NULL) ? "(NULL)" : allow_role)));
 
 }
 
