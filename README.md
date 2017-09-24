@@ -99,14 +99,34 @@ $ psql -U db_owner testdb -c "\d test"
 ERROR:  pg_block_systemcatalog: Reference to the system catalog is not permitted.
 ```
 
-## 動作確認環境
-### OS
+# 動作確認環境
+## OS
 
 - CentOS 7
 
-### PostgreSQL
+## PostgreSQL
 
 - PostgreSQL 10
+
+# 制約事項
+
+- この拡張を適用しても、バックエンドに関する統計情報を統計情報関数経由で取得できてしまいます。
+-- 以下はpg_stat_get_activity関数によよる情報が取得できてしまう例です。なお、pg_stat_get_activity関数結果をFROM句に設定した場合にはエラーとなります。
+
+```
+$ psql -U db_owner testdb -c "SELECT pg_stat_get_activity(pg_backend_pid())"
+                                                                                                                pg_stat_get
+_activity                                                                                                                 
+---------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------
+ (16387,10392,16385,psql,active,"SELECT pg_stat_get_activity(pg_backend_pid())",,,"2017-09-24 10:32:26.037066+09","2017-09-
+24 10:32:26.037066+09","2017-09-24 10:32:26.035487+09","2017-09-24 10:32:26.037067+09",,,-1,,584,"client backend",f,,,,,)
+(1 row)
+
+$ psql -U db_owner testdb -c "SELECT * FROM pg_stat_get_activity(pg_backend_pid())"
+ERROR:  pg_block_systemcatalog: Reference to the system catalog is not permitted.
+$ 
+```
 
 # TODO
 
