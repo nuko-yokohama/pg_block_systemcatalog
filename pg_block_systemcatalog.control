@@ -1,5 +1,5 @@
 # pg_block_systemcatalog extension
 comment = 'PostgreSQL extension to block references to system catalogs.'
-default_version = '0.5'
+default_version = '1.0'
 module_pathname = '$libdir/pg_block_systemcatalog'
 relocatable = true
