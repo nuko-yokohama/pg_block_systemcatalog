@@ -15,7 +15,7 @@ pg_block_systemcatalogは、以下のカスタムパラメータを設定でき�
 
 |パラメータ名|設定値|デフォルト値|パラメータコンテキスト|
 |:--|:--|:--|:--|
-|pg_block_systemcatalog.allow_role|システムカタログへの参照を許容するロール名|なし|postmaster|
+|pg_block_systemcatalog.allow_role|システムカタログへの参照を許容するロール名|なし|superuser|
 
 ### allow_roleの設定と利用方法
 
@@ -111,7 +111,8 @@ ERROR:  pg_block_systemcatalog: Reference to the system catalog is not permitted
 # 制約事項
 
 - この拡張を適用しても、バックエンドに関する統計情報を統計情報関数経由で取得できてしまいます。
--- 以下はpg_stat_get_activity関数によよる情報が取得できてしまう例です。なお、pg_stat_get_activity関数結果をFROM句に設定した場合にはエラーとなります。
+  - 以下はpg_stat_get_activity関数によよる情報が取得できてしまう例です。
+  - なお、pg_stat_get_activity関数結果をFROM句に設定した場合にはエラーとなります。
 
 ```
 $ psql -U db_owner testdb -c "SELECT pg_stat_get_activity(pg_backend_pid())"
@@ -127,6 +128,18 @@ $ psql -U db_owner testdb -c "SELECT * FROM pg_stat_get_activity(pg_backend_pid(
 ERROR:  pg_block_systemcatalog: Reference to the system catalog is not permitted.
 $ 
 ```
+
+- おそらくC言語で実装されたSQL関数内でシステムカタログの情報を取得するようなケースはブロックできないでしょう。SQLやpl/pgsqlで実装されたSQL関数であれば、ブロック可能です。
+
+# 性能への影響
+開発環境上でこの拡張を組み込まないときと、組み込んだときの性能差をpgbenchで測定したところ、有意な程の性能差は確認されませんでした。
+- pg_block_systemcatalogの設定
+  - pg_block_systemcatalog.allow_role = 'monitor_catalog'
+- 測定内容
+  - pgbench実行ユーザは、monitor_catalog ロールに含まれない一般ユーザ(db_owner)
+  - スケールファクタ=5, --unlogged-table モードで作成
+  - トランザクションパターンはデフォルトと参照のみ(-S)の2種類
+  - 同時実行数は2, 1回の測定時間は60秒, 3回測定。
 
 # TODO
 
