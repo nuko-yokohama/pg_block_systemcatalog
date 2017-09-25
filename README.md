@@ -15,7 +15,7 @@ pg_block_systemcatalogは、以下のカスタムパラメータを設定でき�
 
 |パラメータ名|設定値|デフォルト値|パラメータコンテキスト|
 |:--|:--|:--|:--|
-|pg_block_systemcatalog.allow_role|システムカタログへの参照を許容するロール名|なし|superuser|
+|pg_block_systemcatalog.allow_role|システムカタログへの参照を許容するロール名|'' (empty string)|superuser|
 
 ### allow_roleの設定と利用方法
 
@@ -144,7 +144,6 @@ $
 # TODO
 
 - 他のPostgreSQLバージョンでの動作確認
-- リグレッションテスト
 - README.md の英語化
 
 # 作者
