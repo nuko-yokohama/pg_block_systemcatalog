@@ -1,0 +1,93 @@
+CREATE ROLE monitor_role;
+CREATE USER monitor;
+CREATE USER test;
+GRANT monitor_role TO monitor;
+CREATE TABLE tmp (id int, data text);
+SET pg_block_systemcatalog.allow_role = '';
+-- superuser
+SELECT CURRENT_USER;
+ current_user 
+--------------
+ postgres
+(1 row)
+
+SELECT relname FROM pg_class WHERE relname = 'tmp';
+ relname 
+---------
+ tmp
+(1 row)
+
+SELECT table_name FROM information_schema.tables WHERE table_name = 'tmp';
+ table_name 
+------------
+ tmp
+(1 row)
+
+SELECT relname FROM pg_stat_user_tables WHERE relname = 'tmp';
+ relname 
+---------
+ tmp
+(1 row)
+
+-- test(error)
+SET ROLE test;
+SELECT CURRENT_USER;
+ current_user 
+--------------
+ test
+(1 row)
+
+SELECT relname FROM pg_class WHERE relname = 'tmp';
+ERROR:  pg_block_systemcatalog: Reference to the system catalog is not permitted.
+SELECT table_name FROM information_schema.tables WHERE table_name = 'tmp';
+ERROR:  pg_block_systemcatalog: Reference to the system catalog is not permitted.
+SELECT relname FROM pg_stat_user_tables WHERE relname = 'tmp';
+ERROR:  pg_block_systemcatalog: Reference to the system catalog is not permitted.
+RESET ROLE;
+-- monitor(error)
+SET ROLE monitor;
+SELECT CURRENT_USER;
+ current_user 
+--------------
+ monitor
+(1 row)
+
+SELECT relname FROM pg_class WHERE relname = 'tmp';
+ERROR:  pg_block_systemcatalog: Reference to the system catalog is not permitted.
+SELECT table_name FROM information_schema.tables WHERE table_name = 'tmp';
+ERROR:  pg_block_systemcatalog: Reference to the system catalog is not permitted.
+SELECT relname FROM pg_stat_user_tables WHERE relname = 'tmp';
+ERROR:  pg_block_systemcatalog: Reference to the system catalog is not permitted.
+RESET ROLE;
+SET pg_block_systemcatalog.allow_role = 'monitor';
+-- monitor(error)
+SET ROLE monitor;
+SELECT CURRENT_USER;
+ current_user 
+--------------
+ monitor
+(1 row)
+
+SELECT relname FROM pg_class WHERE relname = 'tmp';
+ relname 
+---------
+ tmp
+(1 row)
+
+SELECT table_name FROM information_schema.tables WHERE table_name = 'tmp';
+ table_name 
+------------
+(0 rows)
+
+SELECT relname FROM pg_stat_user_tables WHERE relname = 'tmp';
+ relname 
+---------
+ tmp
+(1 row)
+
+RESET ROLE;
+DROP TABLE tmp;
+REVOKE monitor_role FROM monitor; 
+DROP ROLE test;
+DROP ROLE monitor;
+DROP ROLE monitor_role;
