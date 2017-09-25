@@ -145,7 +145,7 @@ _PG_init(void)
         "Role name to allow a reference to the system catalog.",
         NULL,
         &allow_role,
-        NULL,
+        "",
         PGC_SUSET,
         GUC_NOT_IN_SAMPLE,
         NULL, NULL, NULL);
