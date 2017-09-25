@@ -37,7 +37,7 @@ RESET ROLE;
 
 SET pg_block_systemcatalog.allow_role = 'monitor';
 
--- monitor(error)
+-- monitor(success)
 SET ROLE monitor;
 
 SELECT CURRENT_USER;
