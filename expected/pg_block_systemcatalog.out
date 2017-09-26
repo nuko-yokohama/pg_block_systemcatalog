@@ -60,7 +60,7 @@ SELECT relname FROM pg_stat_user_tables WHERE relname = 'tmp';
 ERROR:  pg_block_systemcatalog: Reference to the system catalog is not permitted.
 RESET ROLE;
 SET pg_block_systemcatalog.allow_role = 'monitor';
--- monitor(error)
+-- monitor(success)
 SET ROLE monitor;
 SELECT CURRENT_USER;
  current_user 
