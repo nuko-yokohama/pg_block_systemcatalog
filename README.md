@@ -47,7 +47,7 @@ GRANT monitor_catalog TO monitor
 monitorユーザでpg_stat_activityなどを監視したい場合には、デフォルトロール pg_monitor も設定したほうが良いでしょう。
 
 ```
-GRANT monitor_catalog TO monitor;
+GRANT pg_monitor TO monitor;
 ```
 
 \du コマンドでロール状態を確認すると、以下のようになっているはずです。
