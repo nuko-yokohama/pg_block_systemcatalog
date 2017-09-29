@@ -43,6 +43,7 @@ SET ROLE monitor;
 SELECT CURRENT_USER;
 
 SELECT relname FROM pg_class WHERE relname = 'tmp';
+-- Since monitor role does not have access authority to test, it returns empty result.
 SELECT table_name FROM information_schema.tables WHERE table_name = 'tmp';
 SELECT relname FROM pg_stat_user_tables WHERE relname = 'tmp';
 
